@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sort"
+	// "sort"
+    "math"
 	"strconv"
 	"strings"
 )
@@ -25,38 +26,43 @@ func (mm *MeanMedian) IsOdd() bool {
 	return true
 }
 
-func (mm *MeanMedian) CalcMedian(n ...float64) float64 {
-	sort.Float64s(mm.numbers) // sort the numbers
+func (mm *MeanMedian) CalcMean() float64 {
+	total := 0.0
 
-	mNumber := len(mm.numbers) / 2
-
-	if mm.IsOdd() {
-		return mm.numbers[mNumber]
+	for _, v := range mm.numbers {
+		total += v
 	}
 
-	return (mm.numbers[mNumber-1] + mm.numbers[mNumber]) / 2
+	// IMPORTANT: return was rounded!
+    // TODO fix the off by one error
+	return math.Round(total / float64(len(mm.numbers))) - 1
 }
 
-func (mm *MeanMedian) CalcFuelCost(median int, n ...float64) int {
+func (mm *MeanMedian) CalcFuelCost(mean int, n ...float64) int {
 	fuel_cost := 0
 	for _, j := range mm.numbers {
 		i := int(j)
-		fmt.Printf("number %s \n", strconv.Itoa(int(i)))
 		x := 0
-		if i < median {
-			x = median - i
-			// fmt.Printf("Fuel cost += %s \n", strconv.Itoa(x))
-			fuel_cost += x
+		if i < mean {
+			x = mean - i
+            y := 0
+            for i := 1;i <= x; i++ {
+                y += i
+            }
+			fuel_cost += y
 
 		} else {
 			// i is larger
-			y := median - i
+			y := mean - i
 			x -= i
 			x = -x
 			y = -y
 			x = y
-			// fmt.Printf("Fuel cost += %s \n", strconv.Itoa(x))
-			fuel_cost += x
+            z := 0
+            for i := 1;i <= x; i++ {
+                z += i
+            }
+			fuel_cost += z
 		}
 	}
 	return fuel_cost
@@ -71,11 +77,9 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	// First scan outside of loop to get first depth
 	crabs := MeanMedian{}
 	for scanner.Scan() {
 		line := scanner.Text()
-		// Strip out the arrow and split coords
 		s := strings.Split(line, ",")
 		for _, v := range s {
 			pos, _ := strconv.ParseFloat(v, 64)
@@ -83,9 +87,9 @@ func main() {
 
 		}
 	}
-	median := crabs.CalcMedian()
-	fmt.Print(median)
-	median_int := int(median)
-	res := crabs.CalcFuelCost(median_int)
+	mean := crabs.CalcMean()
+	fmt.Print(mean)
+	mean_int := int(mean)
+	res := crabs.CalcFuelCost(mean_int)
 	fmt.Printf("Result %s \n", strconv.Itoa(res))
 }
