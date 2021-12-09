@@ -32,7 +32,7 @@ func lineCounter(r io.Reader) (int, error) {
 }
 
 func getHeightMap(rawBytes []byte) [][]int {
-	height_map := make([][]int, 101, 101)
+	height_map := make([][]int, 100, 100)
 
 	lines := strings.Split(string(rawBytes), "\n")
 	for i, line := range lines {
@@ -68,9 +68,6 @@ func main() {
 	lowest_points := []int{}
 
 	for i, r := range height_map {
-		if len(r) == 0 {
-			continue
-		}
 		// Set to highest value
 		left := 9
 		right := 9
@@ -96,7 +93,7 @@ func main() {
 				up = height_map[i-1][j]
 
 			}
-			if i < len(height_map)-2 {
+			if i < len(height_map)-1 {
 				down = height_map[i+1][j]
 			}
 
