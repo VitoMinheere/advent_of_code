@@ -58,6 +58,10 @@ func getOctiMap(rawBytes []byte) Octi {
 			row[j].energy = number
 			row[j].flashed = false
 			row[j].neighbours = findNeighbours(octi, i, j)
+			if i == 1 && j == 1 {
+				fmt.Println(row[j].neighbours)
+				fmt.Print("\n")
+			}
 		}
 		octi.specimens[i] = row
 	}
@@ -78,7 +82,7 @@ func stepOne(octi Octi) Octi {
 func stepTwo(octi Octi) Octi {
 	for i, r := range octi.specimens {
 		for j, v := range r {
-			if v.energy == 9 && v.flashed == false {
+			if v.energy > 9 && v.flashed == false {
 				octi = flashOctopus(octi, i, j)
 			}
 		}
@@ -89,10 +93,29 @@ func stepTwo(octi Octi) Octi {
 func stepThree(octi Octi) Octi {
 	for i, r := range octi.specimens {
 		for j := range r {
-			octi.specimens[i][j].flashed = false
+			octopus := &octi.specimens[i][j]
+			if octopus.flashed == true { // || octopus.energy > 9 {
+				octi.flashes++
+				octopus.energy = 0
+			}
+			octopus.flashed = false
 		}
 	}
 	return octi
+}
+
+func checkAllFlashed(octi Octi) bool {
+	all_flashed := false
+	value := 0
+	for i, r := range octi.specimens {
+		for j := range r {
+			value += octi.specimens[i][j].energy
+		}
+	}
+	if value == 0 {
+		all_flashed = true
+	}
+	return all_flashed
 }
 
 func findNeighbours(array Octi, r int, c int) []Pos {
@@ -123,19 +146,33 @@ func findNeighbours(array Octi, r int, c int) []Pos {
 
 func flashOctopus(octi Octi, row int, col int) Octi {
 	cur_octopus := &octi.specimens[row][col]
-	cur_octopus.energy = 0
 	cur_octopus.flashed = true
-	octi.flashes++
+	// octi.flashes++
 
 	for _, n := range cur_octopus.neighbours {
-		octi.specimens[n.row][n.col].energy++
+		neighbour := &octi.specimens[n.row][n.col]
+		neighbour.energy++
+		if neighbour.energy > 9 && neighbour.flashed == false {
+			// octi.flashes++
+			flashOctopus(octi, n.row, n.col)
+		}
 	}
 
 	return octi
 }
 
+func printMatrix(octi Octi) {
+	for _, r := range octi.specimens {
+		for _, v := range r {
+			fmt.Print(v.energy)
+		}
+		fmt.Printf("\n")
+	}
+	fmt.Printf("\n")
+}
+
 func main() {
-	file, err := os.Open("test.txt")
+	file, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -147,20 +184,29 @@ func main() {
 	}
 
 	octi := getOctiMap(rawBytes)
+	printMatrix(octi)
 	// fmt.Println(octi.specimens[0][3])
 
-	for n := 0; n < 2; n++ {
-		fmt.Printf("Step %s \n", strconv.Itoa(n))
+	for n := 1; n <= 1000; n++ {
+		// fmt.Printf("Step %s \n", strconv.Itoa(n))
+		// fmt.Printf("\n")
 		octi = stepOne(octi)
-		for _, r := range octi.specimens {
-			fmt.Println(r)
-			fmt.Printf("\n")
-			//TODO Check with example output
+		// fmt.Printf("Step 1 \n")
+		// printMatrix(octi)
+		octi = stepTwo(octi)
+		// fmt.Printf("Step 2 \n")
+		// printMatrix(octi)
+		// fmt.Printf("Step 3 \n")
+		octi = stepThree(octi)
+		// fmt.Printf("After Step %s \n", strconv.Itoa(n))
+		// printMatrix(octi)
+		allFlashed := checkAllFlashed(octi)
+		if allFlashed == true {
+			fmt.Printf("All flashed in step %s \n", strconv.Itoa(n))
+			break
 
 		}
-		octi = stepTwo(octi)
-		octi = stepThree(octi)
-
+		fmt.Printf("Total Flashes = %s \n", strconv.Itoa(octi.flashes))
 	}
 
 	fmt.Println(octi.flashes)
