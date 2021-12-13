@@ -11,6 +11,11 @@ import (
 	"strings"
 )
 
+type Fold struct {
+    axis    string
+    index   int
+}
+
 func lineCounter(r io.Reader) (int, error) {
 	buf := make([]byte, 32*1024)
 	count := 0
@@ -51,13 +56,30 @@ func getHighestNumbers(rawBytes []byte) (int, int) {
 			}
 		}
 	}
+    // fmt.Printf("highest x : %s \n", strconv.Itoa(max_x))
+    // fmt.Printf("highest y : %s \n", strconv.Itoa(max_y))
 	return max_x, max_y
 }
 
-func applyDots(rawBytes []byte) [][]int {
-	paper := make([][]int, 895)
-	for i := 0; i < 895; i++ {
-		row := make([]int, 1311)
+func getFolds(rawBytes []byte) []Fold {
+    folds := []Fold{}
+
+	lines := strings.Split(string(rawBytes), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "fold along") {
+			s := strings.Split(line, "=")
+            axis := s[0][len(s[0])-1:]
+            index, _ := strconv.Atoi(s[1])
+            folds = append(folds, Fold{axis, index})
+		}
+	}
+	return folds
+}
+
+func applyDots(rawBytes []byte, cols int, rows int) [][]int {
+	paper := make([][]int, rows+1)
+	for i := 0; i <= rows; i++ {
+		row := make([]int, cols+1)
 		paper[i] = row
 	}
 
@@ -66,7 +88,6 @@ func applyDots(rawBytes []byte) [][]int {
 		if len(line) > 0 && len(line) <= 9 {
 			s := strings.Split(line, ",")
 			if len(s) <= 9 && len(s) > 0 {
-				fmt.Println(s)
 				x, _ := strconv.Atoi(s[0])
 				y, _ := strconv.Atoi(s[1])
 				paper[y][x] = 1
@@ -79,27 +100,51 @@ func applyDots(rawBytes []byte) [][]int {
 	return paper
 }
 
-func foldPaper(paper [][]int, fold int) [][]int {
-	first_half := make([][]int, fold+1)
-	first_half = paper[:fold]
-	// fmt.Print(len(first_half))
+func foldPaper(paper [][]int, fold int, fold_type string) [][]int {
+    folded := [][]int{}
 
-	second_half := make([][]int, fold)
-	second_half = paper[fold+1:]
-	// fmt.Print(len(second_half))
+    if fold_type == "y" {
+        first_half := make([][]int, fold+1)
+        first_half = paper[:fold]
 
-	// Only vertical folds first
-	for i, r := range second_half {
-		y := -(i - fold)
-		fmt.Printf("Row %s is folded y %s \n", strconv.Itoa(i), strconv.Itoa(y))
-		for j, v := range r {
-			if v == 1 {
-				first_half[y-1][j] = v
-			}
-		}
-	}
+        second_half := make([][]int, fold)
+        second_half = paper[fold+1:]
 
-	return first_half
+        for i, r := range second_half {
+            y := -(i - fold)
+            // fmt.Printf("Row %s is folded y %s \n", strconv.Itoa(i), strconv.Itoa(y))
+            for j, v := range r {
+                if v == 1 {
+                    first_half[y-1][j] = v
+                }
+            }
+        }
+        folded = first_half
+    }
+    if fold_type == "x" {
+        first_half := make([][]int, len(paper)+1)
+        for i, r := range paper {
+            first_half[i] = r[:fold]
+        }
+
+        second_half := make([][]int, len(paper)+1)
+        for i, r := range paper {
+            second_half[i] = r[fold+1:]
+        }
+
+        for i, r := range second_half {
+            for j, v := range r {
+                x := -(j - fold)
+                // fmt.Printf("Col %s is folded x %s \n", strconv.Itoa(j), strconv.Itoa(x))
+                if v == 1 {
+                    first_half[i][x-1] = v
+                }
+            }
+        }
+        folded = first_half
+    }
+
+	return folded
 }
 
 func countDots(paper [][]int) int {
@@ -124,13 +169,28 @@ func main() {
 		panic(err)
 	}
 
-	paper := applyDots(rawBytes)
+    x, y := getHighestNumbers(rawBytes)
+    folds := getFolds(rawBytes)
+	paper := applyDots(rawBytes, x, y)
 
-	paper = foldPaper(paper, 655)
-	// for _, r := range paper {
-	// 	fmt.Println(r)
-	// }
+	for _, r := range folds {
+	    paper = foldPaper(paper, r.index, r.axis)
+	}
 
 	result := countDots(paper)
-	fmt.Printf("Result = %s \n", strconv.Itoa(result))
+	fmt.Printf("Result p1 = %s \n", strconv.Itoa(result))
+
+    // result_p2
+    for _, r := range paper {
+        text := ""
+        for _, v := range r {
+            if v == 0 {
+                text += " "
+            }
+            if v == 1 {
+                text += "#"
+            }
+        }
+        fmt.Println(text)
+    }
 }
