@@ -7,6 +7,12 @@ import (
 	"os"
 )
 
+type Bracket struct {
+	open   string
+	close  string
+	points int
+}
+
 func main() {
 	file, err := os.Open("test.txt")
 	if err != nil {
@@ -18,11 +24,11 @@ func main() {
 	// First scan outside of loop to get first depth
 	scanner.Scan()
 
-	closing_brackets := make([]string, 4)
-	closing_brackets[0] = ")"
-	closing_brackets[1] = "]"
-	closing_brackets[2] = "}"
-	closing_brackets[3] = ">"
+	brackets := make([]Bracket, 4)
+	brackets[0] = Bracket{"(", ")", 3}
+	brackets[1] = Bracket{"[", "]", 57}
+	brackets[2] = Bracket{"{", "}", 1197}
+	brackets[3] = Bracket{"<", ">", 25137}
 
 	incomplete_lines := []string{}
 
@@ -31,7 +37,7 @@ func main() {
 		line := scanner.Text()
 		end_char := line[len(line)-1:]
 		closes := false
-		for _, b := range closing_brackets {
+		for _, b := range brackets {
 			if end_char == b {
 				closes = true
 			}
