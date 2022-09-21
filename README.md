@@ -1,4 +1,4 @@
-# advent_of_code_2021
-Advent of code 2021 in Go
+# advent_of_code
+Repo for my Advent of Code submissions
 
-My attempt at Advent of Code 2021 while also learning some Go on the go
+Working mainly with Python but dabbling into some other languages as well.

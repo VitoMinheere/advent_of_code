@@ -2,20 +2,6 @@ from collections import Counter
 
 def main():
     bit_list = open("input.txt").read().splitlines()
-    # bit_list = [
-    #     "00100",
-    #     "11110",
-    #     "10110",
-    #     "10111",
-    #     "10101",
-    #     "01111",
-    #     "00111",
-    #     "11100",
-    #     "10000",
-    #     "11001",
-    #     "00010",
-    #     "01010",
-    # ]
     # find_oxygen_value(bit_list)
     find_co2_scrubber(bit_list)
     
