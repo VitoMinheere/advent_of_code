@@ -3,7 +3,7 @@ $ ls
 dir a
 14848514 b.txt
 8504156 c.dat
-dir d
+dir das
 $ cd a
 $ ls
 dir e
@@ -15,7 +15,10 @@ $ ls
 584 i
 $ cd ..
 $ cd ..
-$ cd d
+$ cd efg
+$ ls
+dir das
+$ cd das
 $ ls
 4060174 j
 8033020 d.log
