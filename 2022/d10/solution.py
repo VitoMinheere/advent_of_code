@@ -1,45 +1,66 @@
 import time
 
-def p1(data):
+class Device:
+    matrix = [[" " for x in range(0, 40)] for _ in range(0, 7)]
+    matrix[0][0] = "#"
+    val = 0
     cycles = 0
-    register = 0
-
+    register = 1
     check_cycles = [20, 60, 100, 140, 180, 220]
     check_values = []
+    sprite = [0, 1, 2]
 
-    def update_cycles(amount, cycles, register):
-        for _ in range(0, amount):
-            cycles += 1
-            if cycles in check_cycles:
-                print(f"Cycle {str(cycles)} multiplying by {str(register)}")
-                check_values.append(cycles * (register + 1)) # ugly hack
-        return cycles
-                
+    crt = {"x": 0, "y": 0}
 
-    for line in data:
-        if line == "noop":
-            cycles = update_cycles(1, cycles, register)
-            continue
+    def update_sprite(self):
+        self.sprite = [self.register-1, self.register, self.register+1]
+
+    def update_crt(self):
+        if self.crt["x"] in self.sprite:
+            self.matrix[self.crt["y"]][self.crt["x"]] = "#"
         else:
-            val = int(line.split(" ")[-1])
-            cycles = update_cycles(2, cycles, register)
-            register += val
+            self.matrix[self.crt["y"]][self.crt["x"]] = " "
 
-    p1 = sum(check_values)
-    print("P1 = " + str(p1))
+        if self.crt["x"] == 39:
+            self.crt["x"] = 0
+            self.crt["y"] += 1
+        else:
+            self.crt["x"] += 1
         
+            
 
-def p2(data):
-    pass
+    def update_cycles(self, amount):
+        for _ in range(0, amount):
+            self.cycles += 1
+            self.update_crt()
+            if self.cycles in self.check_cycles:
+                self.check_values.append(self.cycles * (self.register)) # + 1)) # ugly hack
+            if _ == 1:
+                self.register += self.val
+                self.update_sprite()
+
+    def print_matrix(self):
+        print('\n'.join([''.join([item for item in row]) for row in self.matrix]))
+
+    def p1(self, data):
+        for line in data:
+            if line == "noop":
+                self.update_cycles(1)
+            else:
+                self.val = int(line.split(" ")[-1])
+                self.update_cycles(2)
+
+        p1 = sum(self.check_values)
+        print("P1 = " + str(p1))
+        print("P2")
+        self.print_matrix()
+            
 
 with open("input.txt") as t:
     data = t.read().splitlines()
     start = time.time()
-    p1(data)
+    device = Device()
+    device.p1(data)
     p1_time = time.time() - start
-    # p2_start = time.time()
-    # p2(data)
-    # p2_time = time.time() - p2_start
 
     print("P1 took " + str(round(p1_time * 1000)) + " ms")
-    # print("P2 took " + str(round(p2_time * 1000)) + " ms")
