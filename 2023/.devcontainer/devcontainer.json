@@ -1,0 +1,13 @@
+{
+    "name": "Advent of code Go",
+    "image": "mcr.microsoft.com/devcontainers/go:0-1.19-bullseye",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.Go",
+                "ms-vscode.makefile-tools"
+            ]
+        }
+    }
+}
