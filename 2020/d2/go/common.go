@@ -1,26 +1,20 @@
-package p1
+package main
 
 import (
 	"bufio"
 	"log"
 	"os"
-	"strconv"
 	"time"
 )
 
-func parse() []int {
+func parse() []string {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	list := []int{}
+	list := []string{}
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		num, err := strconv.Atoi(line)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		list = append(list, num)
+		list = append(list, line)
 	}
 	return list
 }
