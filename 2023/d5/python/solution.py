@@ -1,59 +1,44 @@
 import time
 
-seeds = {}
+seeds = []
 
-def parse_values(line, lookup, name):
-    _map = line.split("\n")[1:]
-    for s in _map:
-        dest, src, ran = [int(x) for x in s.split(" ")]
+def parse_values(dest, src, ran, val):
+    new_val = val
+    num = val - src 
+    if num >= 0 and num <= ran:
+        new_val = dest + num
 
-        for k, v in seeds.items():
-                name_num = v[lookup] - src 
-                if name_num > 0 and name_num <= ran:
-                    new_val = dest + name_num
-                    seeds[k][name] = new_val
+    return new_val
 
-    s = [k for k, v in seeds.items() if name not in v]
-    for i in s:
-        seeds[i][name] = seeds[i][lookup]
-
-def update_seed(num):
-    if num not in seeds:
-        seeds[int(num)] = {
-            "seed": int(num),
-        }
-    
-def p1(data):
+def solution(data, p2=False):
     blocks = data.split("\n\n")
+    
+    if not p2: 
+        seed_numbers = blocks[0].split(": ")[-1].split(" ")
+        for num in seed_numbers:
+            seeds.append(int(num))
 
-    for line in blocks:
-        if "seeds:" in line:
-            seed_numbers = line.split(": ")[-1].split(" ")
-            for num in seed_numbers:
-                update_seed(int(num))
+    calculations = {} 
+    for line in blocks[1:]:
+        name = line.split("\n")[0]
+        calculations[name] = []
+        parts = line.split("\n")[1:] 
+        for p in parts:
+            calculations[name].append([int(x) for x in p.split(" ")])
 
-        elif "seed-to-soil" in line:
-            parse_values(line, "seed", "soil")
-
-        elif "soil-to-fertilizer" in line:
-            parse_values(line, "soil", "fertilizer")
-
-        elif "fertilizer-to-water" in line:
-            parse_values(line, "fertilizer", "water")
-
-        elif "water-to-light" in line:
-            parse_values(line, "water", "light")
-
-        elif "light-to-temperature" in line:
-            parse_values(line, "light", "temperature")
-
-        elif "temperature-to-humidity" in line:
-            parse_values(line, "temperature", "humidity")
-
-        elif "humidity-to-location" in line:
-            parse_values(line, "humidity", "location")
-
-    answer = sorted([v["location"] for k, v in seeds.items()])[0]
+    for i, s in enumerate(seeds):
+        changes = [s]
+        val = s
+        for k, v in calculations.items():
+            for c in v:
+                new_val = parse_values(c[0], c[1], c[2], val)
+                if new_val != val:
+                    val = new_val
+                    changes.append(new_val)
+                    break
+        seeds[i] = val
+        
+    answer = sorted(seeds)[0]
     return answer
             
             
@@ -67,7 +52,7 @@ if __name__ == "__main__":
         data = t.read()
 
         start_p1 = time.time()
-        answer_1 = p1(data)
+        answer_1 = solution(data)
         print(f"P1 answer = {answer_1}")
         p1_time = time.time() - start_p1
         print("P1 took " + str(round(p1_time * 1000)) + " ms")
