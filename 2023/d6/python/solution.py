@@ -21,7 +21,9 @@ def p1(data):
             time_to_move = times[i] - s
             dist = speed * time_to_move
             if dist > distances[i]:
-                winning_options += 1
+                winning_options = times[i] - s - (s-1)
+                break
+                
         options_per_race.append(winning_options)
             
     answer = reduce(lambda x, y: x*y, options_per_race)
@@ -49,18 +51,16 @@ def p2(data):
 
     return answer
 
-            
-
 
 if __name__ == "__main__":
     with open("2023/d6/input") as t:
         data = t.read().splitlines()
 
-        # start_p1 = time.time()
-        # answer_1 = p1(data)
-        # print(f"P1 answer = {answer_1}")
-        # p1_time = time.time() - start_p1
-        # print("P1 took " + str(round(p1_time * 1000)) + " ms")
+        start_p1 = time.time()
+        answer_1 = p1(data)
+        print(f"P1 answer = {answer_1}")
+        p1_time = time.time() - start_p1
+        print("P1 took " + str(round(p1_time * 1000)) + " ms")
     
         start_p2 = time.time()
         answer_2 = p2(data)
