@@ -15,7 +15,22 @@ def p1(data):
     return sum(result)
 
 def p2(data):
-    pass
+    list_1, list_2 = [], []
+    for row in data:
+        n1, n2 = row.split("   ")
+        list_1.append(int(n1))
+        list_2.append(int(n2))
+
+    seen = {}
+    result = 0
+
+    for n in list_1:
+        if n not in seen:
+            seen[n] = n * list_2.count(n) 
+        result += seen[n]
+
+    return result
+            
 
 if __name__ == "__main__":
     with open("2024/input.txt") as t:
@@ -26,9 +41,11 @@ if __name__ == "__main__":
         print(f"P1 answer = {answer_1}")
         p1_time = time.time() - start_p1
         print("P1 took " + str(round(p1_time * 1000)) + " ms")
+        # 1ms
     
         start_p2 = time.time()
         answer_2 = p2(data)
         print(f"P2 answer = {answer_2}")
         p2_time = time.time() - start_p2
         print("P2 took " + str(round(p2_time * 1000)) + " ms")
+        # 15ms
